@@ -1,23 +1,34 @@
 #!/bin/bash
 
+rm -rf ../train ../test ../valid
+mkdir ../train ../test ../valid
 for d in */ ; do
-	echo $d
     cd $d
+    class=0
     num=$(ls -l | grep -v ^d | wc -l)
-    if [ $num -ge 20 ]; then
+    if [ $num -ge 200 ] && [ $num -le 300 ]; then
     	mkdir ../../train/$d
     	mkdir ../../valid/$d
+        mkdir ../../test/$d
+        ((class++))
     	count=0
-    	((thre=num / 4))
+        thread_test=10
+        thread_valid=50
         for file in * ; do
-        	if (( count > thre)); then
-        	    cp $file ../../train/$d
+        	if (( count < thread_test)); then
+        	    cp $file ../../test/$d
         	    ((count++))
-        	else
+        	elif (( count < thread_valid )); then
         		cp $file ../../valid/$d
         	    ((count++))
+            else
+                cp $file ../../train/$d
+                ((count++))
         	fi
         done
+        echo $d
+        echo $count
     fi
     cd ..
 done
+echo $class
